@@ -1,0 +1,42 @@
+{
+  "name": "accesskey",
+  "version": "1.0.0",
+  "description": "accesskey for chrome or edge",
+  "main": "dist/accesskey.min.js",
+  "scripts": {
+    "release": "release-it",
+    "build": "rollup -c && rollup -c --config:minify",
+    "bundle": "rollup -c",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "release-it": {
+    "github": {
+      "release": true
+    },
+    "npm": {
+      "release": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qt06/accesskey.git"
+  },
+  "keywords": [
+    "accjs",
+    "accesskey",
+    "chrome"
+  ],
+  "author": "qt06",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qt06/accesskey/issues"
+  },
+  "homepage": "https://github.com/qt06/accesskey/#readme",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "minimist": "^1.2.5",
+    "rollup": "^2.21.0",
+    "rollup-plugin-terser": "^6.1.0",
+    "shelljs": "^0.8.4"
+  }
+}

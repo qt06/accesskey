@@ -1,4 +1,3 @@
-(function() {
   function isVisible(t) {
     return !! (!t.hasAttribute('disabled') && t.getAttribute('aria-hidden') !== 'true' && t.offsetParent !== null);
   }
@@ -92,5 +91,3 @@
     },
     null);
   }
-
-})();
