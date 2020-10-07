@@ -1,6 +1,6 @@
 {
   "name": "accesskey",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "accesskey for chrome or edge",
   "main": "dist/accesskey.min.js",
   "scripts": {

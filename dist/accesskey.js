@@ -2,98 +2,97 @@
   'use strict';
 
   function isVisible(t) {
-      return !! (!t.hasAttribute('disabled') && t.getAttribute('aria-hidden') !== 'true' && t.offsetParent !== null);
-    }
+    return !! (!t.hasAttribute('disabled') && t.getAttribute('aria-hidden') !== 'true' && t.offsetParent !== null);
+  }
 
-    function removeAccesskeyAttribute(selector) {
-      document.querySelectorAll(selector).forEach(function(el) {
-        el.removeAttribute('accesskey');
-      });
+  function removeAccesskeyAttribute(selector) {
+    document.querySelectorAll(selector).forEach(function(el) {
+      el.removeAttribute('accesskey');
+    });
+  }
+  function addClass(selector, clsName) {
+    document.querySelectorAll(selector).forEach(function(el) {
+      el.classList.add(clsName);
+    });
+  }
+
+  function gi(i, len, op) {
+    let n = op == '+' ? +1 : -1;
+    i = i + n;
+    if (i >= len) {
+      i = 0;
     }
-    function addClass(selector, clsName) {
-      document.querySelectorAll(selector).forEach(function(el) {
-        el.classList.add(clsName);
-      });
+    if (i < 0) {
+      i = len - 1;
     }
-    function toFocus(focusSelector, op) {
-      let els = document.all;
-      let len = els.length;
-      let ae = document.activeElement;
-      let aeIndex = 0,
-      index = 0;
-      for (let i = 0; i < len; i++) {
-        if (els[i] == ae) {
-          aeIndex = index = i;
-          break;
-        }
+    return i;
+  }
+
+  function _toFocus(el) {
+    let tagName = el.tagName.toLowerCase();
+    let tagNames = ['div', 'p', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'form', 'img', 'nav', 'header', 'main', 'footer', 'section', 'aside'];
+    if (tagNames.includes(tagName) || (tagName == 'a' && !el.hasAttribute('href'))) {
+      if (!el.hasAttribute('tabindex')) {
+        el.setAttribute('tabindex', '-1');
       }
-      let i = op == '+' ? index + 1 : index - 1;
-      while (i != aeIndex) {
-        if (els[i].matches(focusSelector) && isVisible(els[i])) {
-          index = i;
-          break;
-        }
-        i = op == '+' ? i + 1 : i - 1;
-        if (i >= len) {
-          i = 0;
-        }
-        if (i < 0) {
-          i = len - 1;
-        }
+    }
+    el.focus();
+  }
+
+  function toFocus(focusSelector, op) {
+    let els = [...document.body.querySelectorAll('*')];
+    let len = els.length;
+    let aeIndex = Math.max(0, els.indexOf(document.activeElement));
+    let i = aeIndex == 0 ? 0 : gi(aeIndex, len, op);
+    do {
+      if (els[i].matches(focusSelector) && isVisible(els[i])) {
+        _toFocus(els[i]);
+        break;
       }
-      let el = els[index];
-      let tagName = el.tagName.toLowerCase();
-      let pels = ['div', 'p', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'form', 'img', 'nav', 'header', 'main', 'footer', 'section', 'aside'];
-      if (pels.includes(tagName) || (tagName == 'a' && !el.hasAttribute('href'))) {
-        if (!el.hasAttribute('tabindex')) {
-          el.setAttribute('tabindex', '-1');
-        }
+      i = gi(i, len, op);
+    } while ( i != aeIndex );
+  }
+
+  function nextFocus(selector) {
+    toFocus(selector, '+');
+  }
+
+  function previousFocus(selector) {
+    toFocus(selector, '-');
+  }
+
+  function isIE() {
+    return ( !! window.ActiveXObject || "ActiveXObject" in window);
+  }
+
+  if (!isIE()) {
+    let keys = [];
+    document.querySelectorAll('[accesskey]').forEach(function(el) {
+      let key = el.getAttribute('accesskey');
+      if (!keys.includes(key)) {
+        keys.push(key);
       }
-      el.focus();
-    }
+    });
+    keys.forEach(function(key) {
+      addClass('[accesskey="' + key + '"]', 'accesskey-' + key);
+      removeAccesskeyAttribute('[accesskey="' + key + '"]');
+    });
 
-    function nextFocus(selector) {
-      toFocus(selector, '+');
-    }
-
-    function previousFocus(selector) {
-      toFocus(selector, '-');
-    }
-
-    function isIE() {
-      return ( !! window.ActiveXObject || "ActiveXObject" in window);
-    }
-
-    if (!isIE()) {
-      let els = document.querySelectorAll('[accesskey]');
-      let keys = [];
-      els.forEach(function(el) {
-        let key = el.getAttribute('accesskey');
-        if (!keys.includes(key)) {
-          keys.push(key);
-        }
-      });
+    document.addEventListener('keydown',
+    function(e) {
       keys.forEach(function(key) {
-        addClass('[accesskey="' + key + '"]', 'accesskey-' + key);
-        removeAccesskeyAttribute('[accesskey="' + key + '"]');
+        let keyCode = key.toUpperCase().charCodeAt();
+        if (e.altKey && e.shiftKey && e.keyCode == keyCode) {
+          e.preventDefault();
+          previousFocus('.accesskey-' + key);
+        } else if (e.altKey && e.keyCode == keyCode) {
+          e.preventDefault();
+          nextFocus('.accesskey-' + key);
+        }
       });
-
-      document.addEventListener('keydown',
-      function(e) {
-        keys.forEach(function(key) {
-          let keyCode = key.toUpperCase().charCodeAt();
-          if (e.altKey && e.shiftKey && e.keyCode == keyCode) {
-            e.preventDefault();
-            previousFocus('.accesskey-' + key);
-          }
-          else if (e.altKey && e.keyCode == keyCode) {
-            e.preventDefault();
-            nextFocus('.accesskey-' + key);
-          }
-        });
-      },
-      null);
-    }
+    },
+    null);
+  }
 
 }());
 //# sourceMappingURL=accesskey.js.map
