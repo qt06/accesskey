@@ -5,17 +5,6 @@
     return !! (!t.hasAttribute('disabled') && t.getAttribute('aria-hidden') !== 'true' && t.offsetParent !== null);
   }
 
-  function removeAccesskeyAttribute(selector) {
-    document.querySelectorAll(selector).forEach(function(el) {
-      el.removeAttribute('accesskey');
-    });
-  }
-  function addClass(selector, clsName) {
-    document.querySelectorAll(selector).forEach(function(el) {
-      el.classList.add(clsName);
-    });
-  }
-
   function gi(i, len, op) {
     let n = op == '+' ? +1 : -1;
     i = i + n;
@@ -65,22 +54,33 @@
     return ( !! window.ActiveXObject || "ActiveXObject" in window);
   }
 
-  if (!isIE()) {
-    let keys = [];
+  function accjsMutationObserver(proc, el) {
+      let mo = new MutationObserver((records) => {
+          proc();
+      });
+      mo.observe(el, {
+          'childList': true,
+          'subtree': true
+      });
+      return mo;
+  }
+  function accjsProc() {
     document.querySelectorAll('[accesskey]').forEach(function(el) {
       let key = el.getAttribute('accesskey');
-      if (!keys.includes(key)) {
-        keys.push(key);
+  el.removeAttribute('accesskey');
+  el.classList.add('accesskey-' + key);
+      if (!window.accjsAccesskeys.includes(key)) {
+        window.accjsAccesskeys.push(key);
       }
     });
-    keys.forEach(function(key) {
-      addClass('[accesskey="' + key + '"]', 'accesskey-' + key);
-      removeAccesskeyAttribute('[accesskey="' + key + '"]');
-    });
+  }
 
+  if (!isIE()) {
+    window.accjsAccesskeys = [];
+    accjsProc();
     document.addEventListener('keydown',
     function(e) {
-      keys.forEach(function(key) {
+      window.accjsAccesskeys.forEach(function(key) {
         let keyCode = key.toUpperCase().charCodeAt();
         if (e.altKey && e.shiftKey && e.keyCode == keyCode) {
           e.preventDefault();
@@ -92,6 +92,9 @@
       });
     },
     null);
+    if(document.querySelectorAll('script[data-accjs-mutation-observer]').length > 0) {
+      accjsMutationObserver(accjsProc, document.body);
+    }
   }
 
 }());
